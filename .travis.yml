@@ -1,0 +1,24 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build vishwas123v/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true vishwas123v/react-test npm test
+
+after_success:
+  - docker build -t vishwas123v/multi-client ./client
+  - docker build -t vishwas123v/multi-nginx ./nginx
+  - docker build -t vishwas123v/multi-server ./server
+  - docker build -t vishwas123v/multi-worker ./worker
+
+  # login to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+
+  - docker push vishwas123v/multi-client
+  - docker push vishwas123v/multi-nginx
+  - docker push vishwas123v/multi-server
+  - docker push vishwas123v/multi-worker
